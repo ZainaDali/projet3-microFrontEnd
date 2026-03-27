@@ -254,7 +254,7 @@ export default function UndergroundRadio() {
   const barGradient =
     barColorMap[themeColor] ||
     'linear-gradient(180deg, #8bf6ff 0%, #45b3ff 55%, #2a6fd8 100%)';
-  const isCrisis = frequency !== '87.7';
+  const isCrisis = themeColor === 'red' || themeColor === 'orange';
 
   return (
     <div className={`underground-radio${isCrisis ? ' crisis' : ''}`}>
