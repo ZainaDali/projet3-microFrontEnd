@@ -14,10 +14,17 @@ const SIMULATION_STEPS = [
   { event: 'weather:change', payload: { condition: 'storm' }, label: 'weather:change(storm)' },
   { event: 'power:outage', payload: { severity: 'partial' }, label: 'power:outage(partial)' },
   { event: 'power:outage', payload: { severity: 'total' }, label: 'power:outage(total)' },
+
   { event: 'hacker:command', payload: { command: 'riot' }, label: "hacker:command('riot')" },
   { event: 'hacker:command', payload: { command: 'love' }, label: "hacker:command('love')" },
+
+ 
+  { event: 'hacker:command', payload: { command: 'blackout' }, label: "hacker:command('blackout')" },
+  { event: 'hacker:command', payload: { command: 'drones' }, label: "hacker:command('drones')" },
+  { event: 'crowd:panic', payload: { level: 80, trending: '#riot' }, label: 'crowd:panic(80)' },
+
   { event: 'hacker:command', payload: { command: 'reset' }, label: "hacker:command('reset')" },
-];
+];;
 
 export default function UndergroundRadio() {
   const bars = Array.from({ length: 14 });
@@ -155,13 +162,69 @@ export default function UndergroundRadio() {
           isEmergency: false,
         });
       }
+      else if (command === 'blackout') {
+  const msg = '☠️ BLACKOUT IMMINENT. Coupez vos appareils.';
+
+  applyState({
+    freq: '91.3',
+    name: '☢ UNDERGROUND RADIO',
+    sub: 'Alerte réseau',
+    color: 'red',
+    msg,
+  });
+
+  eventBus.emit('radio:broadcast', {
+    message: msg,
+    frequency: '91.3',
+    isEmergency: true,
+  });
+
+} else if (command === 'drones') {
+  const msg = '🛸 Essaim de drones détecté au-dessus de la ville.';
+
+  applyState({
+    freq: '87.7',
+    name: 'NEON FM',
+    sub: '🛸 ALERTE DRONES',
+    color: 'orange',
+    msg,
+  });
+
+  eventBus.emit('radio:broadcast', {
+    message: msg,
+    frequency: '87.7',
+    isEmergency: true,
+  });
+}
     });
+    const unsubPanic = eventBus.on('crowd:panic', ({ level, trending }) => {
+  if (level > 70) {
+    const msg = `🚨 PANIQUE NIVEAU ${level}. ${trending} envahit les rues.`;
+
+    applyState({
+      freq: '666.6',
+      name: '☢ UNDERGROUND RADIO',
+      sub: trending,
+      color: 'red',
+      msg,
+    });
+
+    eventBus.emit('radio:broadcast', {
+      message: msg,
+      frequency: '666.6',
+      isEmergency: true,
+    });
+  }
+});
+
+
 
     // Cleanup: unsubscribe from all events on unmount
     return () => {
       unsubWeather();
       unsubPower();
       unsubHacker();
+      unsubPanic(); 
     };
   }, [applyState]);
 
