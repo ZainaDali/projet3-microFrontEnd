@@ -135,9 +135,23 @@
 }
 
 .underground-radio.crisis {
-  border-color: #6b2020;
-  box-shadow: inset 0 0 30px rgba(255, 45, 45, 0.12);
+  border-color: #ff2d2d;
+  animation: crisis-pulse 0.8s ease-in-out infinite;
 }
+
+@keyframes crisis-pulse {
+  0%, 100% {
+    box-shadow: inset 0 0 40px rgba(255, 45, 45, 0.1), 0 0 10px rgba(255, 45, 45, 0.2);
+    background: linear-gradient(165deg, #06060b 0%, #101624 45%, #121a2e 100%);
+    border-color: #6b2020;
+  }
+  50% {
+    box-shadow: inset 0 0 80px rgba(255, 45, 45, 0.6), 0 0 30px rgba(255, 45, 45, 0.5);
+    background: linear-gradient(165deg, #2a0505 0%, #3a0a0a 45%, #1a0505 100%);
+    border-color: #ff2d2d;
+  }
+}
+
 
 .underground-radio.crisis .radio-freq {
   color: #ff6b6b;
