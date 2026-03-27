@@ -26,7 +26,6 @@ const SIMULATION_STEPS = [
   { event: 'hacker:command', payload: { command: 'reset' }, label: "hacker:command('reset')" },
 
   { event: 'hospital:alert', payload: { status: 'CRITIQUE', generator: false }, label: 'hospital:alert(critique)' },
-  { event: 'hacker:command', payload: { command: 'reset' }, label: "hacker:command('reset')" },
 ];;
 
 export default function UndergroundRadio() {
@@ -77,22 +76,16 @@ export default function UndergroundRadio() {
   }, [fullMessage]);
 
   useEffect(() => {
-    const unsubWeather = eventBus.on('weather:change', ({ condition }) => {
-      if (condition === 'storm') {
-        applyState({
-          freq: '87.7',
-          name: 'NEON FM',
-          sub: '⚠️ ALERTE MÉTÉO',
-          color: 'red',
-          msg: '⚠️ ALERTE MÉTÉO - Pluie toxique détectée. Restez chez vous.',
-        });
-        eventBus.emit('radio:broadcast', {
-          message: '⚠️ ALERTE MÉTÉO - Pluie toxique détectée. Restez chez vous.',
-          frequency: '87.7',
-          isEmergency: true,
-        });
-      }
-    });
+    const unsubWeather = eventBus.on('weather:change', ({ condition, toxicity }) => {
+    if (condition === 'storm') {
+      const msg = toxicity > 50
+        ? `⚠️ AIR TOXIQUE CRITIQUE (${toxicity}%). Ne sortez pas.`
+        : '⚠️ ALERTE MÉTÉO - Pluie toxique détectée. Restez chez vous.';
+
+      applyState({ freq: '87.7', name: 'NEON FM', sub: '⚠️ ALERTE MÉTÉO', color: 'red', msg });
+      eventBus.emit('radio:broadcast', { message: msg, frequency: '87.7', isEmergency: true });
+    }
+  });
 
     const unsubPower = eventBus.on('power:outage', ({ severity }) => {
       if (severity === 'partial') {
