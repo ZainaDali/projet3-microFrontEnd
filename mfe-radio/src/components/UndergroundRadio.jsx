@@ -24,6 +24,9 @@ const SIMULATION_STEPS = [
   { event: 'crowd:panic', payload: { level: 80, trending: '#riot' }, label: 'crowd:panic(80)' },
 
   { event: 'hacker:command', payload: { command: 'reset' }, label: "hacker:command('reset')" },
+
+  { event: 'hospital:alert', payload: { status: 'CRITIQUE', generator: false }, label: 'hospital:alert(critique)' },
+  { event: 'hacker:command', payload: { command: 'reset' }, label: "hacker:command('reset')" },
 ];;
 
 export default function UndergroundRadio() {
@@ -197,27 +200,41 @@ export default function UndergroundRadio() {
   });
 }
     });
+
     const unsubPanic = eventBus.on('crowd:panic', ({ level, trending }) => {
-  if (level > 70) {
-    const msg = `🚨 PANIQUE NIVEAU ${level}. ${trending} envahit les rues.`;
+      if (level > 70) {
+        const msg = `🚨 PANIQUE NIVEAU ${level}. ${trending} envahit les rues.`;
 
-    applyState({
-      freq: '666.6',
-      name: '☢ UNDERGROUND RADIO',
-      sub: trending,
-      color: 'red',
-      msg,
+        applyState({
+          freq: '666.6',
+          name: '☢ UNDERGROUND RADIO',
+          sub: trending,
+          color: 'red',
+          msg,
+        });
+
+        eventBus.emit('radio:broadcast', {
+          message: msg,
+          frequency: '666.6',
+          isEmergency: true,
+        });
+      }
     });
 
-    eventBus.emit('radio:broadcast', {
-      message: msg,
-      frequency: '666.6',
-      isEmergency: true,
+    const unsubHospital = eventBus.on('hospital:alert', ({ status, generator }) => {
+      if (!generator) {
+        applyState(
+          { freq: '91.3', 
+            name: '☢ UNDERGROUND RADIO', 
+            sub: 'ALERTE HÔPITAL', 
+            color: 'red', 
+            msg: `HÔPITAL EN ALERTE : ${status}. Générateur coupé.` });
+        eventBus.emit('radio:broadcast', 
+          { message: `HÔPITAL : ${status}`, 
+            frequency: '91.3', 
+            isEmergency: true });
+      }
     });
-  }
-});
-
-
 
     // Cleanup: unsubscribe from all events on unmount
     return () => {
@@ -225,6 +242,7 @@ export default function UndergroundRadio() {
       unsubPower();
       unsubHacker();
       unsubPanic(); 
+      unsubHospital();
     };
   }, [applyState]);
 
